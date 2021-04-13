@@ -1,6 +1,6 @@
 const { and } = require('graphql-shield');
 
-const { inputDataValidation } = require('../../utils/rules');
+const { inputDataValidation, isUnlocked } = require('../../utils/rules');
 const {
   INPUT_FIELDS: { ORDER, LIMIT, SKIP, FILTER, DATE },
 } = require('../../consts/input-fields');
@@ -11,7 +11,7 @@ const {
 } = require('../../validators/order.validator');
 
 const orderPermissionsMutation = {
-  addOrder: inputDataValidation(ORDER, orderValidator),
+  addOrder: and(inputDataValidation(ORDER, orderValidator), isUnlocked),
   updateOrder: inputDataValidation(ORDER, orderValidator),
 };
 

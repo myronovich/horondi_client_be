@@ -42,6 +42,7 @@ const {
   YOU_CANT_UNLOCK_YOURSELF,
   ONLY_SUPER_ADMIN_CAN_UNLOCK_ADMIN,
   ONLY_SUPER_ADMIN_CAN_BLOCK_ADMIN,
+  USER_IS_BLOCKED,
 } = require('../../error-messages/user.messages');
 const FilterHelper = require('../../helpers/filter-helper');
 const {
@@ -437,6 +438,10 @@ class UserService extends FilterHelper {
 
     if (!user) {
       throw new UserInputError(WRONG_CREDENTIALS, { statusCode: BAD_REQUEST });
+    }
+
+    if (user.banned.blockPeriod !== UNLOCKED) {
+      throw new UserInputError(USER_IS_BLOCKED, { statusCode: FORBIDDEN });
     }
 
     const match = await bcrypt.compare(
