@@ -33,6 +33,12 @@ const {
   PAYMENT_METHOD: { CASH },
 } = require('../../../consts/payments');
 
+const {
+  STATUS_CODES: { BAD_REQUEST },
+} = require('../../../consts/status-codes');
+
+const RuleError = require('../../../errors/rule.error');
+
 class NovaPoshtaService {
   async getNovaPoshtaRequest(properties, model, method) {
     return await axios.post(NOVA_POSHTA_API_LINK, {
@@ -208,7 +214,7 @@ class NovaPoshtaService {
     const document = res.data.data[0];
 
     if (!document) {
-      throw Error(ORDER_CREATION_FAILED);
+      throw RuleError(ORDER_CREATION_FAILED, BAD_REQUEST);
     }
 
     return {

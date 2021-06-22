@@ -1,10 +1,4 @@
 const categoryService = require('./category.service');
-const {
-  CATEGORY_NOT_FOUND,
-} = require('../../error-messages/category.messages');
-const {
-  STATUS_CODES: { NOT_FOUND, BAD_REQUEST },
-} = require('../../consts/status-codes');
 const RuleError = require('../../errors/rule.error');
 
 const categoryQuery = {
@@ -15,20 +9,35 @@ const categoryQuery = {
       return new RuleError(e.message, e.statusCode);
     }
   },
-  getCategoriesForBurgerMenu: (parent, args) =>
-    categoryService.getCategoriesForBurgerMenu(),
-  getPopularCategories: () => categoryService.getPopularCategories(),
+  getCategoriesForBurgerMenu: async (parent, args) => {
+    try {
+      return await categoryService.getCategoriesForBurgerMenu();
+    } catch (e) {
+      return new RuleError(e.message, e.statusCode);
+    }
+  },
+  getPopularCategories: async () => {
+    try {
+      return await categoryService.getPopularCategories();
+    } catch (e) {
+      return new RuleError(e.message, e.statusCode);
+    }
+  },
+
   getCategoryById: async (parent, args) => {
     try {
       return await categoryService.getCategoryById(args.id);
     } catch (e) {
-      return {
-        statusCode: NOT_FOUND,
-        message: e.message,
-      };
+      return new RuleError(e.message, e.statusCode);
     }
   },
-  getCategoriesWithModels: () => categoryService.getCategoriesWithModels(),
+  getCategoriesWithModels: async () => {
+    try {
+      return await categoryService.getCategoriesWithModels();
+    } catch (e) {
+      return new RuleError(e.message, e.statusCode);
+    }
+  },
 };
 
 const categoryMutation = {
@@ -40,30 +49,21 @@ const categoryMutation = {
         user
       );
     } catch (e) {
-      return {
-        statusCode: BAD_REQUEST,
-        message: e.message,
-      };
+      return new RuleError(e.message, e.statusCode);
     }
   },
   deleteCategory: async (parent, args, { user }) => {
     try {
       return await categoryService.deleteCategory(args, user);
     } catch (e) {
-      return {
-        statusCode: NOT_FOUND,
-        message: e.message,
-      };
+      return new RuleError(e.message, e.statusCode);
     }
   },
   updateCategory: async (parent, args, { user }) => {
     try {
       return await categoryService.updateCategory(args, user);
     } catch (e) {
-      return {
-        statusCode: e.message === CATEGORY_NOT_FOUND ? NOT_FOUND : BAD_REQUEST,
-        message: e.message,
-      };
+      return new RuleError(e.message, e.statusCode);
     }
   },
 };

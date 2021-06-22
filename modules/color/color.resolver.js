@@ -1,19 +1,20 @@
 const colorService = require('./color.service');
-const {
-  STATUS_CODES: { NOT_FOUND, BAD_REQUEST },
-} = require('../../consts/status-codes');
+const RuleError = require('../../errors/rule.error');
 
 const colorQuery = {
-  getAllColors: async () => colorService.getAllColors(),
+  getAllColors: async () => {
+    try {
+      return await colorService.getAllColors();
+    } catch (e) {
+      return new RuleError(e.message, e.statusCode);
+    }
+  },
 
   getColorById: async (parent, { id }) => {
     try {
       return await colorService.getColorById(id);
     } catch (e) {
-      return {
-        statusCode: NOT_FOUND,
-        message: e.message,
-      };
+      return new RuleError(e.message, e.statusCode);
     }
   },
 };
@@ -23,10 +24,7 @@ const colorMutation = {
     try {
       return await colorService.addColor(data, user);
     } catch (e) {
-      return {
-        statusCode: BAD_REQUEST,
-        message: e.message,
-      };
+      return new RuleError(e.message, e.statusCode);
     }
   },
 
@@ -34,10 +32,7 @@ const colorMutation = {
     try {
       return await colorService.deleteColor(id, user);
     } catch (e) {
-      return {
-        statusCode: NOT_FOUND,
-        message: e.message,
-      };
+      return new RuleError(e.message, e.statusCode);
     }
   },
 };

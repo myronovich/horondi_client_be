@@ -78,7 +78,7 @@ class CommentsService {
   async getAllCommentsByProduct({ productId }) {
     const product = await Product.findById(productId).exec();
     if (!product) {
-      throw new Error(COMMENT_NOT_FOUND);
+      throw new RuleError(COMMENT_NOT_FOUND, NOT_FOUND);
     }
     const comments = await Comment.find({ product: productId }).exec();
     return comments;
@@ -87,7 +87,7 @@ class CommentsService {
   async getAllCommentsByUser(userId) {
     const comments = await Comment.find({ user: userId }).exec();
     if (!comments.length) {
-      throw new Error(COMMENT_FOR_NOT_EXISTING_USER);
+      throw new RuleError(COMMENT_FOR_NOT_EXISTING_USER, NOT_FOUND);
     }
     return comments;
   }
@@ -192,7 +192,7 @@ class CommentsService {
     const product = await Product.findById(id).exec();
 
     if (!product) {
-      throw new Error(RATE_FOR_NOT_EXISTING_PRODUCT);
+      throw new RuleError(RATE_FOR_NOT_EXISTING_PRODUCT, NOT_FOUND);
     }
     const { userRates } = product;
     let { rateCount } = product;

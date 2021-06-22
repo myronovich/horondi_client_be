@@ -2,7 +2,7 @@ const ordersService = require('./order.service');
 const { ORDER_NOT_FOUND } = require('../../error-messages/orders.messages');
 const RuleError = require('../../errors/rule.error');
 const {
-  STATUS_CODES: { BAD_REQUEST, NOT_FOUND },
+  STATUS_CODES: { NOT_FOUND },
 } = require('../../consts/status-codes');
 
 const ordersQuery = {
@@ -11,10 +11,7 @@ const ordersQuery = {
     if (order) {
       return order;
     }
-    return {
-      statusCode: NOT_FOUND,
-      message: ORDER_NOT_FOUND,
-    };
+    return new RuleError(ORDER_NOT_FOUND, NOT_FOUND);
   },
   getAllOrders: async (parent, args) => await ordersService.getAllOrders(args),
   getUserOrders: async (_, args, { user }) => {
@@ -51,19 +48,13 @@ const ordersMutation = {
     if (deletedOrder) {
       return deletedOrder;
     }
-    return {
-      statusCode: NOT_FOUND,
-      message: ORDER_NOT_FOUND,
-    };
+    return new RuleError(ORDER_NOT_FOUND, NOT_FOUND);
   },
   updateOrder: async (parent, args) => {
     try {
       return await ordersService.updateOrder(args.order, args.id);
     } catch (e) {
-      return {
-        statusCode: e.message === ORDER_NOT_FOUND ? NOT_FOUND : BAD_REQUEST,
-        message: e.message,
-      };
+      return new RuleError(e.message, e.statusCode);
     }
   },
 };

@@ -1,39 +1,48 @@
 const contactService = require('./contact.service');
-const {
-  CONTACT_NOT_FOUND,
-  CONTACT_ALREADY_EXIST,
-} = require('../../error-messages/contact.messages');
-const {
-  STATUS_CODES: { NOT_FOUND, BAD_REQUEST },
-} = require('../../consts/status-codes');
+const RuleError = require('../../errors/rule.error');
 
 const contactQuery = {
-  getContacts: (parent, args) => contactService.getContacts(args),
-  getContactById: async (parent, args) =>
-    (await contactService.getContactById(args.id)) || {
-      statusCode: NOT_FOUND,
-      message: CONTACT_NOT_FOUND,
-    },
+  getContacts: async (parent, args) => {
+    try {
+      return await contactService.getContacts(args);
+    } catch (error) {
+      return new RuleError(error.message, error.statusCode);
+    }
+  },
+
+  getContactById: async (parent, args) => {
+    try {
+      return await contactService.getContactById(args.id);
+    } catch (error) {
+      return new RuleError(error.message, error.statusCode);
+    }
+  },
 };
 
 const contactMutation = {
-  addContact: async (parent, args) =>
-    (await contactService.addContact(args)) || {
-      statusCode: BAD_REQUEST,
-      message: CONTACT_ALREADY_EXIST,
-    },
+  addContact: async (parent, args) => {
+    try {
+      return await contactService.addContact(args);
+    } catch (error) {
+      return new RuleError(error.message, error.statusCode);
+    }
+  },
 
-  deleteContact: async (parent, args) =>
-    (await contactService.deleteContact(args.id)) || {
-      statusCode: NOT_FOUND,
-      message: CONTACT_NOT_FOUND,
-    },
+  deleteContact: async (parent, args) => {
+    try {
+      return await contactService.deleteContact(args.id);
+    } catch (error) {
+      return new RuleError(error.message, error.statusCode);
+    }
+  },
 
-  updateContact: async (parent, args) =>
-    (await contactService.updateContact(args)) || {
-      statusCode: NOT_FOUND,
-      message: CONTACT_NOT_FOUND,
-    },
+  updateContact: async (parent, args) => {
+    try {
+      return await contactService.updateContact(args);
+    } catch (error) {
+      return new RuleError(error.message, error.statusCode);
+    }
+  },
 };
 
 module.exports = { contactQuery, contactMutation };

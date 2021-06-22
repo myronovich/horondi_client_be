@@ -14,6 +14,12 @@ const {
   DELIVERY_SERVICES_INITIAL_VALUES: { ID, DATE, INITIAL_TEXT, UKR, EN },
 } = require('../../consts/delivery-services');
 
+const {
+  STATUS_CODES: { NOT_FOUND },
+} = require('../../consts/status-codes');
+
+const RuleError = require('../../errors/rule.error');
+
 class EmailChatService {
   async getAllEmailQuestions({ filter = {}, skip }) {
     const { emailQuestionStatus } = filter;
@@ -41,7 +47,7 @@ class EmailChatService {
   getEmailQuestionById(id) {
     const question = EmailChat.findById(id);
     if (!question) {
-      throw new Error(QUESTION_NOT_FOUND);
+      throw new RuleError(QUESTION_NOT_FOUND, NOT_FOUND);
     }
     return question;
   }
@@ -84,7 +90,7 @@ class EmailChatService {
     const admin = await userService.getUserByFieldOrThrow(ID, adminId);
 
     if (!question) {
-      throw new Error(QUESTION_NOT_FOUND);
+      throw new RuleError(QUESTION_NOT_FOUND, NOT_FOUND);
     }
 
     question.status = ANSWERED;
@@ -123,7 +129,7 @@ class EmailChatService {
         ...item.value._doc,
       }));
     } catch (e) {
-      throw new Error(CHAT_NOT_FOUND);
+      throw new RuleError(CHAT_NOT_FOUND, NOT_FOUND);
     }
   }
 }

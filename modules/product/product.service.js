@@ -42,7 +42,7 @@ const {
 const { getCurrencySign } = require('../../utils/product-service');
 const RuleError = require('../../errors/rule.error');
 const {
-  STATUS_CODES: { FORBIDDEN },
+  STATUS_CODES: { FORBIDDEN, NOT_FOUND, BAD_REQUEST },
 } = require('../../consts/status-codes');
 const {
   HISTORY_ACTIONS: { ADD_PRODUCT, DELETE_PRODUCT, EDIT_PRODUCT },
@@ -138,7 +138,7 @@ class ProductsService {
   async getModelsByCategory(id) {
     const product = await Product.find({ category: id }).exec();
     if (product.length === 0) {
-      throw new Error(CATEGORY_NOT_FOUND);
+      throw new RuleError(CATEGORY_NOT_FOUND, NOT_FOUND);
     }
     return product;
   }
@@ -267,9 +267,9 @@ class ProductsService {
       const newFiles = [];
       filesToUpload.map(e => {
         if (e?.large) {
-          previousImagesLinks.push(e);
+          return previousImagesLinks.push(e);
         } else {
-          newFiles.push(e);
+          return newFiles.push(e);
         }
       });
       const newUploadResult = await uploadService.uploadFiles(newFiles);
@@ -301,7 +301,7 @@ class ProductsService {
 
   async addProduct(productData, filesToUpload, { _id: adminId }) {
     if (await this.checkProductExist(productData)) {
-      throw new Error(PRODUCT_ALREADY_EXIST);
+      throw new RuleError(PRODUCT_ALREADY_EXIST, BAD_REQUEST);
     }
     const { primary, additional } = await uploadProductImages(filesToUpload);
 
@@ -354,7 +354,7 @@ class ProductsService {
       .lean()
       .exec();
     if (!product) {
-      throw new Error(PRODUCT_NOT_FOUND);
+      throw new RuleError(PRODUCT_NOT_FOUND, NOT_FOUND);
     }
     const { images } = product;
     const { primary, additional } = images;

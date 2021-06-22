@@ -1,27 +1,27 @@
 const emailChatService = require('./email-chat.service');
-const {
-  QUESTION_NOT_FOUND,
-} = require('../../error-messages/email-chat.messages');
-const {
-  STATUS_CODES: { NOT_FOUND },
-} = require('../../consts/status-codes');
+const RuleError = require('../../errors/rule.error');
 
 const emailChatQuestionQuery = {
-  getAllEmailQuestions: (parent, args) =>
-    emailChatService.getAllEmailQuestions(args),
-  getPendingEmailQuestionsCount: (parent, args) =>
-    emailChatService.getPendingEmailQuestionsCount(),
-  getEmailQuestionById: async (parent, args) => {
-    const question = await emailChatService
-      .getEmailQuestionById(args.id)
-      .exec();
-    if (question) {
-      return question;
+  getAllEmailQuestions: (parent, args) => {
+    try {
+      return emailChatService.getAllEmailQuestions(args);
+    } catch (e) {
+      return new RuleError(e.message, e.statusCode);
     }
-    return {
-      statusCode: NOT_FOUND,
-      message: QUESTION_NOT_FOUND,
-    };
+  },
+  getPendingEmailQuestionsCount: (parent, args) => {
+    try {
+      return emailChatService.getPendingEmailQuestionsCount();
+    } catch (e) {
+      return new RuleError(e.message, e.statusCode);
+    }
+  },
+  getEmailQuestionById: async (parent, args) => {
+    try {
+      return await emailChatService.getEmailQuestionById(args.id).exec();
+    } catch (e) {
+      return new RuleError(e.message, e.statusCode);
+    }
   },
 };
 
@@ -33,10 +33,7 @@ const emailChatQuestionMutation = {
     try {
       return await emailChatService.makeEmailQuestionsSpam(args);
     } catch (error) {
-      return {
-        statusCode: NOT_FOUND,
-        message: error.message,
-      };
+      return new RuleError(error.message, error.statusCode);
     }
   },
 
@@ -44,10 +41,7 @@ const emailChatQuestionMutation = {
     try {
       return await emailChatService.answerEmailQuestion(args);
     } catch (error) {
-      return {
-        statusCode: NOT_FOUND,
-        message: error.message,
-      };
+      return new RuleError(error.message, error.statusCode);
     }
   },
   deleteEmailQuestions: async (parent, args) => {
@@ -56,10 +50,7 @@ const emailChatQuestionMutation = {
         args.questionsToDelete
       );
     } catch (error) {
-      return {
-        statusCode: NOT_FOUND,
-        message: error.message,
-      };
+      return new RuleError(error.message, error.statusCode);
     }
   },
 };

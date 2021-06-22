@@ -1,7 +1,4 @@
 const userService = require('./user.service');
-const {
-  STATUS_CODES: { BAD_REQUEST },
-} = require('../../consts/status-codes');
 const RuleError = require('../../errors/rule.error');
 
 const userQuery = {
@@ -14,10 +11,7 @@ const userQuery = {
     try {
       return userService.validateConfirmationToken(args.token);
     } catch (err) {
-      return {
-        statusCode: BAD_REQUEST,
-        message: err.message,
-      };
+      return new RuleError(err.message, err.statusCode);
     }
   },
   getPurchasedProducts: (parent, args) =>
@@ -65,10 +59,7 @@ const userMutation = {
     try {
       return await userService.deleteUser(args.id);
     } catch (err) {
-      return {
-        statusCode: err.statusCode,
-        message: err.message,
-      };
+      return new RuleError(err.message, err.statusCode);
     }
   },
   updateUserById: (parent, args, context) =>
@@ -93,10 +84,7 @@ const userMutation = {
     try {
       return await userService.switchUserStatus(args.id);
     } catch (err) {
-      return {
-        statusCode: BAD_REQUEST,
-        message: err.message,
-      };
+      return new RuleError(err.message, err.statusCode);
     }
   },
   resetPassword: (parent, args) =>
@@ -109,11 +97,8 @@ const userMutation = {
         args.email,
         args.language
       );
-    } catch (e) {
-      return {
-        statusCode: BAD_REQUEST,
-        message: e.message,
-      };
+    } catch (err) {
+      return new RuleError(err.message, err.statusCode);
     }
   },
   registerAdmin: async (_, { user }, { user: admin }) => {

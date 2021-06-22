@@ -3,7 +3,7 @@ const { ObjectId } = require('mongoose').Types;
 const RuleError = require('../../errors/rule.error');
 const Order = require('./order.model');
 const {
-  STATUS_CODES: { BAD_REQUEST },
+  STATUS_CODES: { BAD_REQUEST, NOT_FOUND },
 } = require('../../consts/status-codes');
 const {
   ORDER_NOT_FOUND,
@@ -11,14 +11,12 @@ const {
 } = require('../../error-messages/orders.messages');
 const { userDateFormat } = require('../../consts');
 const { minDefaultDate } = require('../../consts/date-range');
-
 const {
   removeDaysFromData,
   countItemsOccurency,
   changeDataFormat,
   reduceByDaysCount,
 } = require('../helper-functions');
-
 const {
   calculateTotalPriceToPay,
   calculateTotalItemsPrice,
@@ -31,7 +29,7 @@ class OrdersService {
   async getOrderByPaidOrderNumber(orderNumber) {
     const order = await Order.findOne({ orderNumber }).exec();
 
-    if (!order) throw new RuleError(ORDER_NOT_FOUND, BAD_REQUEST);
+    if (!order) throw new RuleError(ORDER_NOT_FOUND, NOT_FOUND);
 
     return order;
   }
@@ -107,17 +105,18 @@ class OrdersService {
   async getOrderById(id) {
     const foundOrder = await Order.findById(id).exec();
 
-    if (!foundOrder) throw new RuleError(ORDER_NOT_FOUND, BAD_REQUEST);
+    if (!foundOrder) throw new RuleError(ORDER_NOT_FOUND, NOT_FOUND);
 
     return foundOrder;
   }
 
   async updateOrder(order, id) {
-    if (!ObjectId.isValid(id)) throw new Error(ORDER_NOT_VALID);
+    if (!ObjectId.isValid(id))
+      throw new RuleError(ORDER_NOT_VALID, BAD_REQUEST);
 
     const orderToUpdate = await Order.findById(id).exec();
 
-    if (!orderToUpdate) throw new Error(ORDER_NOT_FOUND);
+    if (!orderToUpdate) throw new RuleError(ORDER_NOT_FOUND, NOT_FOUND);
 
     const { items } = order;
 
@@ -173,11 +172,12 @@ class OrdersService {
   }
 
   async deleteOrder(id) {
-    if (!ObjectId.isValid(id)) throw new Error(ORDER_NOT_VALID);
+    if (!ObjectId.isValid(id))
+      throw new RuleError(ORDER_NOT_VALID, BAD_REQUEST);
 
     const foundOrder = await Order.findByIdAndDelete(id).exec();
 
-    if (!foundOrder) throw new Error(ORDER_NOT_FOUND);
+    if (!foundOrder) throw new RuleError(ORDER_NOT_FOUND, NOT_FOUND);
     return foundOrder;
   }
 

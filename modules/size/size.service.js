@@ -29,6 +29,10 @@ const {
     VOLUME_IN_LITERS,
   },
 } = require('../../consts/history-obj-keys');
+const RuleError = require('../../errors/rule.error');
+const {
+  STATUS_CODES: { NOT_FOUND },
+} = require('../../consts/status-codes');
 
 class SizeService {
   async getAllSizes(limit, skip, filter) {
@@ -69,7 +73,7 @@ class SizeService {
     if (size) {
       return size;
     }
-    throw new Error(SIZES_NOT_FOUND);
+    throw new RuleError(SIZES_NOT_FOUND, NOT_FOUND);
   }
 
   async addSize(sizeData, { _id: adminId }) {
@@ -106,7 +110,7 @@ class SizeService {
       .lean()
       .exec();
     if (!foundSize) {
-      throw new Error(SIZE_NOT_FOUND);
+      throw new RuleError(SIZE_NOT_FOUND, NOT_FOUND);
     }
     const historyRecord = generateHistoryObject(
       DELETE_SIZE,
@@ -138,7 +142,7 @@ class SizeService {
       .exec();
 
     if (!sizeToUpdate) {
-      throw new Error(SIZE_NOT_FOUND);
+      throw new RuleError(SIZE_NOT_FOUND, NOT_FOUND);
     }
     input.additionalPrice = await calculatePrice(input.additionalPrice);
 

@@ -9,7 +9,6 @@ const {
 const {
   UKR_POSHTA_API_LINK,
   UKR_POSHTA_API_KEY,
-  UKR_POSHTA_STATUS_KEY,
   UKR_POSHTA_COUNTERPARTY_TOKEN,
   UKR_POSHTA_COUNTERPARTY_UUID,
   UKR_POSHTA_ADDRESS_API_LINK,
@@ -27,6 +26,12 @@ const {
 const {
   REQUEST_METHODS: { GET, POST },
 } = require('../../../consts/request-methods');
+
+const {
+  STATUS_CODES: { BAD_REQUEST },
+} = require('../../../consts/status-codes');
+
+const RuleError = require('../../../errors/rule.error');
 
 class UkrPoshtaService {
   async getUkrPoshtaRequest(urlParams, method, data) {
@@ -96,7 +101,7 @@ class UkrPoshtaService {
       }
     );
     if (!createdOrder) {
-      throw Error(ORDER_CREATION_FAILED);
+      throw RuleError(ORDER_CREATION_FAILED, BAD_REQUEST);
     }
     return createdOrder.data;
   }

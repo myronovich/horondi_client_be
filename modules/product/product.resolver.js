@@ -1,7 +1,7 @@
 const productsService = require('./product.service');
 const { PRODUCT_NOT_FOUND } = require('../../error-messages/products.messages');
 const {
-  STATUS_CODES: { NOT_FOUND, BAD_REQUEST },
+  STATUS_CODES: { NOT_FOUND },
 } = require('../../consts/status-codes');
 const RuleError = require('../../errors/rule.error');
 
@@ -11,25 +11,37 @@ const productsQuery = {
     if (product) {
       return product;
     }
-    return {
-      statusCode: NOT_FOUND,
-      message: PRODUCT_NOT_FOUND,
-    };
+    return new RuleError(PRODUCT_NOT_FOUND, NOT_FOUND);
   },
   getProducts: async (parent, args) => {
     try {
       return await productsService.getProducts(args);
     } catch (e) {
-      return {
-        statusCode: NOT_FOUND,
-        message: e.message,
-      };
+      return new RuleError(e.message, e.statusCode);
     }
   },
-  getModelsByCategory: (parent, args) =>
-    productsService.getModelsByCategory(args.id),
-  getPopularProducts: () => productsService.getPopularProducts(),
-  getProductsFilters: () => productsService.getProductsFilters(),
+  getModelsByCategory: (parent, args) => {
+    try {
+      return productsService.getModelsByCategory(args.id);
+    } catch (e) {
+      return new RuleError(e.message, e.statusCode);
+    }
+  },
+
+  getPopularProducts: () => {
+    try {
+      return productsService.getPopularProducts();
+    } catch (e) {
+      return new RuleError(e.message, e.statusCode);
+    }
+  },
+  getProductsFilters: () => {
+    try {
+      return productsService.getProductsFilters();
+    } catch (e) {
+      return new RuleError(e.message, e.statusCode);
+    }
+  },
 };
 
 const productsMutation = {
@@ -37,10 +49,7 @@ const productsMutation = {
     try {
       return await productsService.addProduct(args.product, args.upload, user);
     } catch (e) {
-      return {
-        statusCode: BAD_REQUEST,
-        message: e.message,
-      };
+      return new RuleError(e.message, e.statusCode);
     }
   },
   deleteProduct: async (parent, args, { user }) => {
@@ -48,10 +57,7 @@ const productsMutation = {
     if (deletedProduct) {
       return deletedProduct;
     }
-    return {
-      statusCode: NOT_FOUND,
-      message: PRODUCT_NOT_FOUND,
-    };
+    return new RuleError(PRODUCT_NOT_FOUND, NOT_FOUND);
   },
   updateProduct: async (parent, args, { user }) => {
     try {
@@ -70,10 +76,7 @@ const productsMutation = {
     try {
       return await productsService.deleteImages(args.id, args.images);
     } catch (e) {
-      return {
-        statusCode: e.message === PRODUCT_NOT_FOUND ? NOT_FOUND : BAD_REQUEST,
-        message: e.message,
-      };
+      return new RuleError(e.message, e.statusCode);
     }
   },
 };

@@ -18,10 +18,18 @@ const {
 const {
   HISTORY_OBJ_KEYS: { LINK, TITLE, PRIORITY },
 } = require('../../consts/history-obj-keys');
+const RuleError = require('../../errors/rule.error');
+const {
+  STATUS_CODES: { NOT_FOUND, BAD_REQUEST },
+} = require('../../consts/status-codes');
 
 class HeadersService {
   async getAllHeaders() {
-    return await Header.find().exec();
+    try {
+      return await Header.find().exec();
+    } catch (error) {
+      return new RuleError(error.message, error.statusCode);
+    }
   }
 
   async getHeaderById(id) {
@@ -29,7 +37,7 @@ class HeadersService {
     if (foundHeader) {
       return foundHeader;
     }
-    throw new Error(HEADER_NOT_FOUND);
+    throw new RuleError(HEADER_NOT_FOUND, NOT_FOUND);
   }
 
   async updateHeader({ id, header }, { _id: adminId }) {
@@ -38,11 +46,11 @@ class HeadersService {
       .exec();
 
     if (!headerToUpdate) {
-      throw new Error(HEADER_NOT_FOUND);
+      throw new RuleError(HEADER_NOT_FOUND, NOT_FOUND);
     }
 
     if (await this.checkHeaderExist(header, id)) {
-      throw new Error(HEADER_ALREADY_EXIST);
+      throw new RuleError(HEADER_ALREADY_EXIST, BAD_REQUEST);
     }
 
     const updatedHeader = await Header.findByIdAndUpdate(id, header, {
@@ -67,7 +75,7 @@ class HeadersService {
 
   async addHeader({ header }, { _id: adminId }) {
     if (await this.checkHeaderExist(header)) {
-      throw new Error(HEADER_ALREADY_EXIST);
+      throw new RuleError(HEADER_ALREADY_EXIST, BAD_REQUEST);
     }
     const newHeader = await new Header(header).save();
 
@@ -92,7 +100,7 @@ class HeadersService {
       .exec();
 
     if (!foundHeader) {
-      throw new Error(HEADER_NOT_FOUND);
+      throw new RuleError(HEADER_NOT_FOUND, NOT_FOUND);
     }
 
     const historyRecord = generateHistoryObject(
