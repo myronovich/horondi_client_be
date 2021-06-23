@@ -4,6 +4,16 @@ const { uploadContactImages } = require('./contact.utils');
 const {
   MAP_IMAGES_INDECIES: { ZERO_INDEX, FIRST_INDEX },
 } = require('../../consts/map-images-indecies');
+const {
+  CONTACT_NOT_FOUND,
+  CONTACT_ALREADY_EXIST,
+} = require('../../error-messages/contact.messages');
+
+const {
+  STATUS_CODES: { NOT_FOUND, BAD_REQUEST },
+} = require('../../consts/status-codes');
+
+const RuleError = require('../../errors/rule.error');
 
 class ContactService {
   async getContacts({ skip, limit }) {
@@ -24,16 +34,19 @@ class ContactService {
   async getContactById(id) {
     const contact = await Contact.findById(id).exec();
 
-    return contact || null;
+    return contact || new RuleError(CONTACT_NOT_FOUND, NOT_FOUND);
   }
 
   async addContact(data) {
     const images = await uploadContactImages(data);
-
-    return await new Contact({
-      ...data.contact,
-      images,
-    }).save();
+    try {
+      return await new Contact({
+        ...data.contact,
+        images,
+      }).save();
+    } catch (e) {
+      return new RuleError(CONTACT_ALREADY_EXIST, BAD_REQUEST);
+    }
   }
 
   async updateContact(data) {
@@ -41,7 +54,7 @@ class ContactService {
       .lean()
       .exec();
 
-    if (!contact) return null;
+    if (!contact) return new RuleError(CONTACT_NOT_FOUND, NOT_FOUND);
 
     return contact.images.length === 2 &&
       data.mapImages.length === 2 &&
@@ -57,7 +70,7 @@ class ContactService {
       .lean()
       .exec();
 
-    if (!contact) return null;
+    if (!contact) return new RuleError(CONTACT_NOT_FOUND, NOT_FOUND);
 
     if (contact && contact.images && contact.images.length === 2) {
       this.deleteMapImages(contact);

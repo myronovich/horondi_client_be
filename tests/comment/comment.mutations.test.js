@@ -61,7 +61,7 @@ jest.mock('../../modules/currency/currency.model.js');
 jest.mock('../../modules/currency/currency.utils.js');
 jest.mock('../../modules/product/product.utils.js');
 jest.mock('../../modules/currency/currency.utils.js');
-jest.setTimeout(10000);
+jest.setTimeout(50000);
 
 let commentId;
 let operations;
@@ -142,7 +142,7 @@ describe('Comment queries', () => {
     userId = authRes.data.loginUser._id;
   });
 
-  it(' should add a new comment', async () => {
+  it('should add a new comment', async () => {
     const receivedComment = await addComment(
       productId,
       newComment(userId),
@@ -157,7 +157,7 @@ describe('Comment queries', () => {
     expect(receivedComment).toHaveProperty('user', { _id: userId });
     expect(receivedComment).toHaveProperty('show', newComment(userId).show);
   });
-  it(' should return error if to add comment to not existing product', async () => {
+  it('should return error if to add comment to not existing product', async () => {
     const receivedComment = await addComment(
       productWrongId,
       newComment(userId),
@@ -186,7 +186,7 @@ describe('Comment queries', () => {
     expect(receivedComment).toHaveProperty('user', { _id: userId });
     expect(receivedComment).toHaveProperty('product', { _id: productId });
   });
-  it(' should return error if id of comment to update is not correct', async () => {
+  it('should return error if id of comment to update is not correct', async () => {
     const receivedComment = await updateComment(
       commentWrongId,
       updatedComment,

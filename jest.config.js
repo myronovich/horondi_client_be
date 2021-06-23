@@ -6,5 +6,5 @@ module.exports = {
   testResultsProcessor: 'jest-sonar-reporter',
   collectCoverage: true,
   coveragePathIgnorePatterns: ['/node_modules/'],
-  testTimeout: 30000,
+  testTimeout: 50000,
 };

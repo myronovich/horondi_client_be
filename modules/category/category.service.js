@@ -39,24 +39,28 @@ const {
 
 class CategoryService extends FilterHelper {
   async getAllCategories({ filter, pagination }) {
-    const filterOptions = {};
+    try {
+      const filterOptions = {};
 
-    if (filter?.search) {
-      filterOptions['name.0.value'] = {
-        $regex: `${filter.search.trim()}`,
-        $options: 'i',
+      if (filter?.search) {
+        filterOptions['name.0.value'] = {
+          $regex: `${filter.search.trim()}`,
+          $options: 'i',
+        };
+      }
+      const items = await Category.find(filterOptions)
+        .limit(pagination?.limit)
+        .skip(pagination?.skip)
+        .exec();
+
+      const count = Category.find(filterOptions).countDocuments();
+      return {
+        items,
+        count,
       };
+    } catch (e) {
+      return new RuleError(CATEGORY_NOT_FOUND, NOT_FOUND);
     }
-    const items = await Category.find(filterOptions)
-      .limit(pagination?.limit)
-      .skip(pagination?.skip)
-      .exec();
-
-    const count = Category.find(filterOptions).countDocuments();
-    return {
-      items,
-      count,
-    };
   }
 
   async getCategoryById(id) {
@@ -133,12 +137,10 @@ class CategoryService extends FilterHelper {
 
     const data = categories.items.map(async category => {
       const models = await Model.find({ category: category._id }).exec();
-      const modelsFields = models.map(async model => {
-        return {
-          name: model.name,
-          _id: model._id,
-        };
-      });
+      const modelsFields = models.map(async model => ({
+        name: model.name,
+        _id: model._id,
+      }));
       return {
         category: {
           name: [...category.name],
@@ -188,45 +190,47 @@ class CategoryService extends FilterHelper {
   }
 
   async deleteCategory({ deleteId, switchId }, { _id: adminId }) {
-    const category = await Category.findByIdAndDelete(deleteId)
-      .lean()
-      .exec();
-    const switchCategory = await Category.findById(switchId).exec();
+    try {
+      const category = await Category.findByIdAndDelete(deleteId)
+        .lean()
+        .exec();
+      const switchCategory = await Category.findById(switchId).exec();
 
-    const filter = {
-      category: deleteId,
-    };
+      const filter = {
+        category: deleteId,
+      };
 
-    const updateSettings = {
-      $set: { category: switchCategory._id },
-    };
+      const updateSettings = {
+        $set: { category: switchCategory._id },
+      };
 
-    await this.cascadeUpdateRelatives(filter, updateSettings);
+      await this.cascadeUpdateRelatives(filter, updateSettings);
 
-    const images = Object.values(category.images).filter(
-      item => typeof item === 'string' && item
-    );
-
-    if (images.length) {
-      await uploadService.deleteFiles(images);
-    }
-
-    if (category) {
-      const historyRecord = generateHistoryObject(
-        DELETE_CATEGORY,
-        '',
-        category.name[UA].value,
-        category._id,
-        generateHistoryChangesData(category, [NAME, CODE]),
-        [],
-        adminId
+      const images = Object.values(category.images).filter(
+        item => typeof item === 'string' && item
       );
-      await addHistoryRecord(historyRecord);
 
-      return category;
+      if (images.length) {
+        await uploadService.deleteFiles(images);
+      }
+
+      if (category) {
+        const historyRecord = generateHistoryObject(
+          DELETE_CATEGORY,
+          '',
+          category.name[UA].value,
+          category._id,
+          generateHistoryChangesData(category, [NAME, CODE]),
+          [],
+          adminId
+        );
+        await addHistoryRecord(historyRecord);
+
+        return category;
+      }
+    } catch (e) {
+      throw new RuleError(CATEGORY_NOT_FOUND, NOT_FOUND);
     }
-
-    throw new RuleError(CATEGORY_NOT_FOUND, NOT_FOUND);
   }
 
   async getCategoriesWithModels() {
@@ -254,7 +258,7 @@ class CategoryService extends FilterHelper {
 
   getCategoriesStats(categories, total) {
     let popularSum = 0;
-    let res = { names: [], counts: [], relations: [] };
+    const res = { names: [], counts: [], relations: [] };
 
     categories
       .filter((_, idx) => idx < 3)

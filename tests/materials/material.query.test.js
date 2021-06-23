@@ -31,7 +31,7 @@ let operations;
 let colorId;
 let material;
 
-describe('material quarries test', () => {
+describe('material queries test', () => {
   beforeAll(async () => {
     operations = await setupApp();
     const colorData = await createColor(color, operations);
@@ -115,13 +115,13 @@ describe('material quarries test', () => {
     expect(count).toEqual(1);
   });
   it('should receive error if skip is negative', async () => {
-    const { errors } = await getAllMaterialsWithSkipAndLimit(
+    const res = await getAllMaterialsWithSkipAndLimit(
       wrongSkip,
       limit,
       operations
     );
 
-    expect(errors[0].message).toEqual(graphqlErrorMessage);
+    expect(res.data.getAllMaterials.message).toEqual(graphqlErrorMessage);
   });
   it('should receive 3 materials if limit is -3', async () => {
     const {

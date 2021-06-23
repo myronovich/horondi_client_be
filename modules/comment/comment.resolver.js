@@ -23,7 +23,12 @@ const commentsQuery = {
     try {
       return await commentsService.getAllCommentsByProduct(args);
     } catch (error) {
-      return [new RuleError(error.message, error.statusCode)];
+      return [
+        {
+          message: error.message,
+          statusCode: error.statusCode,
+        },
+      ];
     }
   },
 
@@ -31,7 +36,12 @@ const commentsQuery = {
     try {
       return await commentsService.getAllCommentsByUser(args.userId);
     } catch (error) {
-      return [new RuleError(error.message, error.statusCode)];
+      return [
+        {
+          message: error.message,
+          statusCode: error.statusCode,
+        },
+      ];
     }
   },
 };

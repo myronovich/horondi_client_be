@@ -1,5 +1,8 @@
 const newsService = require('./news.service');
 const RuleError = require('../../errors/rule.error');
+const {
+  STATUS_CODES: { NOT_FOUND },
+} = require('../../consts/status-codes');
 
 const newsQuery = {
   getAllNews: (parent, args) => newsService.getAllNews(args),
@@ -24,7 +27,7 @@ const newsMutation = {
     try {
       return await newsService.deleteNews(args.id, user);
     } catch (e) {
-      return new RuleError(e.message, e.statusCode);
+      return new RuleError(e.message, e.statusCode || NOT_FOUND);
     }
   },
   updateNews: async (parent, args, { user }) => {
