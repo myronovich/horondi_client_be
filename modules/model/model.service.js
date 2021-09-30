@@ -223,9 +223,6 @@ class ModelsService {
   }
 
   async addModelConstructorBasic(id, constructorElementID) {
-    if (!ObjectId.isValid(id)) {
-      throw new RuleError(MODEL_NOT_VALID, BAD_REQUEST);
-    }
     return Model.findByIdAndUpdate(
       { _id: id },
       { $addToSet: { constructorBasic: [constructorElementID] } }
@@ -233,9 +230,6 @@ class ModelsService {
   }
 
   async deleteModelConstructorBasic(id, constructorElementID) {
-    if (!ObjectId.isValid(id)) {
-      throw new RuleError(MODEL_NOT_VALID, BAD_REQUEST);
-    }
     return Model.findByIdAndUpdate(
       { _id: id },
       { $pull: { constructorBasic: constructorElementID } },
@@ -244,9 +238,6 @@ class ModelsService {
   }
 
   async addModelConstructorPattern(id, constructorElementID) {
-    if (!ObjectId.isValid(id)) {
-      throw new RuleError(MODEL_NOT_VALID, BAD_REQUEST);
-    }
     return Model.findByIdAndUpdate(
       { _id: id },
       { $addToSet: { constructorPattern: [constructorElementID] } }
@@ -254,9 +245,6 @@ class ModelsService {
   }
 
   async deleteModelConstructorPattern(id, constructorElementID) {
-    if (!ObjectId.isValid(id)) {
-      throw new RuleError(MODEL_NOT_VALID, BAD_REQUEST);
-    }
     return Model.findByIdAndUpdate(
       { _id: id },
       { $pull: { constructorPattern: constructorElementID } },
@@ -265,9 +253,6 @@ class ModelsService {
   }
 
   async addModelConstructorFrontPocket(id, constructorElementID) {
-    if (!ObjectId.isValid(id)) {
-      throw new RuleError(MODEL_NOT_VALID, BAD_REQUEST);
-    }
     return Model.findByIdAndUpdate(
       { _id: id },
       { $addToSet: { constructorFrontPocket: [constructorElementID] } }
@@ -275,9 +260,6 @@ class ModelsService {
   }
 
   async deleteModelConstructorFrontPocket(id, constructorElementID) {
-    if (!ObjectId.isValid(id)) {
-      throw new RuleError(MODEL_NOT_VALID, BAD_REQUEST);
-    }
     return Model.findByIdAndUpdate(
       { _id: id },
       { $pull: { constructorFrontPocket: constructorElementID } },
@@ -286,9 +268,6 @@ class ModelsService {
   }
 
   async addModelConstructorBottom(id, constructorElementID) {
-    if (!ObjectId.isValid(id)) {
-      throw new RuleError(MODEL_NOT_VALID, BAD_REQUEST);
-    }
     return Model.findByIdAndUpdate(
       { _id: id },
       { $addToSet: { constructorBottom: [constructorElementID] } }
@@ -296,9 +275,6 @@ class ModelsService {
   }
 
   async deleteModelConstructorBottom(id, constructorElementID) {
-    if (!ObjectId.isValid(id)) {
-      throw new RuleError(MODEL_NOT_VALID, BAD_REQUEST);
-    }
     return Model.findByIdAndUpdate(
       { _id: id },
       { $pull: { constructorBottom: constructorElementID } },
