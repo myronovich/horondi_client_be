@@ -103,4 +103,4 @@ stages:
           appName: 'horondi-back-staging'
           containers: 'horondistaging.azurecr.io/ita-social-projects/horondi_client_be:$(Build.BuildId)'
 
-        
+       
