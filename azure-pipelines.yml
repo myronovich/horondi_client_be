@@ -143,5 +143,5 @@ stages:
         condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/demo'))
         inputs:
           azureSubscription: 'Visual Studio Enterprise – MPN (734fc759-c3a2-4e22-a478-301dc5b10496)'
-          appName: 'horondi-demo'
+          appName: 'horondi-back-demo'
           containers: 'horondidemo.azurecr.io/ita-social-projects/horondi_client_be:$(Build.BuildId)'
