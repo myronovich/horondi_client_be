@@ -4,10 +4,12 @@
 
 trigger:
   - development
+  - demo
   - master
 
 pr:
   - master
+  - demo
   - development
 
 resources:
@@ -38,6 +40,7 @@ stages:
         inputs:
           targetType: 'inline'
           script: 'mv $(envprod.secureFilePath) .env'
+
       - task: DownloadSecureFile@1
         name: envdev
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/development')
@@ -49,6 +52,18 @@ stages:
         inputs:
           targetType: 'inline'
           script: 'mv $(envdev.secureFilePath) .env'
+
+      - task: DownloadSecureFile@1
+        name: envdemo
+        condition: eq(variables['Build.SourceBranch'], 'refs/heads/demo')
+        inputs:
+          secureFile: 'env-back-demo'
+      - task: Bash@3
+        name: demofile
+        condition: eq(variables['Build.SourceBranch'], 'refs/heads/demo')
+        inputs:
+          targetType: 'inline'
+          script: 'mv $(envdemo.secureFilePath) .env'
       # - task: Bash@3
       #   inputs:
       #     targetType: 'inline'
@@ -71,6 +86,7 @@ stages:
           azureSubscription: 'Visual Studio Enterprise – MPN (734fc759-c3a2-4e22-a478-301dc5b10496)'
           azureContainerRegistry: '{"loginServer":"horondistaging.azurecr.io", "id" : "/subscriptions/734fc759-c3a2-4e22-a478-301dc5b10496/resourceGroups/Horondi/providers/Microsoft.ContainerRegistry/registries/HorondiStaging"}'
           action: 'Push an image'
+
       - task: Docker@0
         name: productionBuild
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
@@ -89,6 +105,26 @@ stages:
           azureSubscription: 'Visual Studio Enterprise – MPN (734fc759-c3a2-4e22-a478-301dc5b10496)'
           azureContainerRegistry: '{"loginServer":"horondi.azurecr.io", "id" : "/subscriptions/734fc759-c3a2-4e22-a478-301dc5b10496/resourceGroups/Horondi/providers/Microsoft.ContainerRegistry/registries/Horondi"}'
           action: 'Push an image'
+
+      - task: Docker@0
+        name: demoBuild
+        condition: eq(variables['Build.SourceBranch'], 'refs/heads/demo')
+        inputs:
+         containerregistrytype: 'Azure Container Registry'
+         azureSubscription: 'Visual Studio Enterprise – MPN (734fc759-c3a2-4e22-a478-301dc5b10496)'
+         azureContainerRegistry: '{"loginServer":"horondidemo.azurecr.io", "id" : "/subscriptions/734fc759-c3a2-4e22-a478-301dc5b10496/resourceGroups/Horondi/providers/Microsoft.ContainerRegistry/registries/HorondiDemo"}'
+         action: 'Build an image'
+         dockerFile: '**/Dockerfile'
+         imageName: '$(Build.Repository.Name):$(Build.BuildId)'
+      - task: Docker@0
+        name: deployedDemo
+        displayName: 'Push an image'
+        condition: eq(variables['Build.SourceBranch'], 'refs/heads/demo')
+        inputs:
+          azureSubscription: 'Visual Studio Enterprise – MPN (734fc759-c3a2-4e22-a478-301dc5b10496)'
+          azureContainerRegistry: '{"loginServer":"horondidemo.azurecr.io", "id" : "/subscriptions/734fc759-c3a2-4e22-a478-301dc5b10496/resourceGroups/Horondi/providers/Microsoft.ContainerRegistry/registries/HorondiDemo"}'
+          action: 'Push an image'
+
       - task: AzureWebAppContainer@1
         condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
         inputs:
@@ -103,4 +139,9 @@ stages:
           appName: 'horondi-back-staging'
           containers: 'horondistaging.azurecr.io/ita-social-projects/horondi_client_be:$(Build.BuildId)'
 
-       
+      - task: AzureWebAppContainer@1
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/demo'))
+        inputs:
+          azureSubscription: 'Visual Studio Enterprise – MPN (734fc759-c3a2-4e22-a478-301dc5b10496)'
+          appName: 'horondi-demo'
+          containers: 'horondidemo.azurecr.io/ita-social-projects/horondi_client_be:$(Build.BuildId)'
