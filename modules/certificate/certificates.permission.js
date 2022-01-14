@@ -9,6 +9,7 @@ const certificatePermissionsQuery = {
 };
 
 const certificatePermissionsMutations = {
+  generateCertificate: hasRoles([USER, ADMIN, SUPERADMIN]),
   updateCertificate: hasRoles([USER, ADMIN, SUPERADMIN]),
   addCertificate: hasRoles([USER, ADMIN, SUPERADMIN]),
   deleteCertificate: hasRoles([ADMIN, SUPERADMIN]),

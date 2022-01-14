@@ -42,6 +42,22 @@ class CertificatesService {
     return certificate;
   }
 
+  async generateCertificate(value, id) {
+    let candidate;
+    let name;
+    let firstNamePart;
+    let secondNamePart;
+
+    do {
+      firstNamePart = Math.floor(1000 + Math.random() * 9000);
+      secondNamePart = Math.floor(1000 + Math.random() * 9000);
+      name = `hor${firstNamePart}${secondNamePart}`;
+      candidate = await Certificate.findOne({ name });
+    } while (candidate);
+
+    return new Certificate({ name, value, createdBy: id }).save();
+  }
+
   async addCertificate(name, value, id) {
     const certificateExists = await Certificate.findOne({ name });
 

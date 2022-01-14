@@ -74,7 +74,7 @@ const {
 const {
   certificateType,
   certificateInput,
-} = require('./modules/certificate/certificate.graphql.js');
+} = require('./modules/certificate/certificate.graphql');
 const {
   commentType,
   commentInput,
@@ -910,6 +910,7 @@ const typeDefs = gql`
     deleteNews(id: ID!): NewsResult
     updateNews(id: ID!, news: NewsInput!, upload: Upload): NewsResult
     "Certificate Mutation"
+    generateCertificate(certificate: CertificateInput!): CertificateResult
     addCertificate(certificate: CertificateInput!): CertificateResult
     deleteCertificate(id: ID!): CertificateResult
     updateCertificate(name: String!): CertificateResult

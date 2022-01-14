@@ -46,6 +46,32 @@ const getCertificateById = async (id, operations) => {
   return certificateById.data.getCertificateById;
 };
 
+const generateCertificate = async (certificate, operations) => {
+  const result = await operations.mutate({
+    mutation: gql`
+      mutation($certificate: CertificateInput!) {
+        generateCertificate(certificate: $certificate) {
+          ... on Certificate {
+            _id
+            name
+            isActive
+            isUsed
+          }
+          ... on Error {
+            message
+            statusCode
+          }
+        }
+      }
+    `,
+    variables: {
+      certificate,
+    },
+  });
+
+  return result.data.generateCertificate;
+};
+
 const addCertificate = async (certificate, operations) => {
   const result = await operations.mutate({
     mutation: gql`
@@ -121,6 +147,7 @@ const deleteCertificate = async (id, operations) => {
 };
 
 module.exports = {
+  generateCertificate,
   deleteCertificate,
   addCertificate,
   getAllCertificates,
